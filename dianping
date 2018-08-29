@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+import sys
+if sys.getdefaultencoding() != 'utf-8':
+  reload(sys)
+  sys.setdefaultencoding('utf-8')
+
+sys.path.append('..')
+import scrapy
+from scrapy.selector import Selector
+from items import DianpingItem
+
+
+class xiaoLongXiaSelector():
+  def __init__(self):
+
+    pass
+
+  def parse(self):
+    fo = open('ch10', 'r')
+    body = Selector(text=fo.read())
+
+    for i in range(2, 20):
+      print i-1,
+      print body.xpath('//h4/text()').extract()[i].encode('utf-8')
+    if len(body.xpath('//li[@class="top"]').extract()) > 0:
+      print "推广",
+      print len(body.xpath('//li[@class="top"]').extract())
+
+    if len(body.xpath('//li[@data-midas]').extract()) > 0:
+      print "广告",
+      print len(body.xpath('//li[@data-midas]').extract())
+
+    eateries = body.xpath('//li[@class=""]')
+    for index, eatery in enumerate(eateries):
+      args = (eatery.xpath('.//a[@class="review-num"]/b/text()').extract(), eatery.xpath('.//a[@class="mean-price"]/b/text()').extract())
+      if (len(args[1]) == 1) and (len(args[2]) == 1):
+        args = (index, args[1][0], args[2][0])
+        print 'index: %d, 点评: %s, Price: %s' % args
+
+    _item = DianpingItem()
+    _item['name'] = body.xpath('//h4').extract()
+
+
+xLX = xiaoLongXiaSelector()
+xLX.parse()
